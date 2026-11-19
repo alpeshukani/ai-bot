@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI Multi-Asset Bot — Paper</title>
+<style>
+  :root{
+    --bg:#0b0e11; --panel:#161a1e; --panel2:#1e2329; --line:#2b3139;
+    --txt:#eaecef; --dim:#848e9c; --green:#0ecb81; --red:#f6465d;
+    --amber:#f0b90b; --blue:#4a9eff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:Inter,'Segoe UI',system-ui,Arial,sans-serif;font-size:14px}
+  header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;
+    padding:14px 18px;border-bottom:1px solid var(--line);background:var(--panel)}
+  header h1{font-size:16px;margin:0;font-weight:600;letter-spacing:.3px}
+  .tag{font-size:11px;padding:2px 8px;border-radius:4px;background:var(--panel2);
+    color:var(--amber);border:1px solid var(--line);text-transform:uppercase;letter-spacing:.6px}
+  .spacer{flex:1}
+  .meta{font-size:12px;color:var(--dim);text-align:right;line-height:1.5}
+  main{padding:16px 18px 40px;max-width:1280px;margin:0 auto}
+  .kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-bottom:18px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+  .kpi .lbl{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.7px}
+  .kpi .val{font-size:22px;font-weight:600;margin-top:6px;font-variant-numeric:tabular-nums}
+  .kpi .sub{font-size:11px;color:var(--dim);margin-top:3px}
+  .cards{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .card .head{display:flex;align-items:center;gap:8px;padding:10px 12px;
+    border-bottom:1px solid var(--line);background:var(--panel2)}
+  .card .sym{font-weight:600;letter-spacing:.3px}
+  .card .px{margin-left:auto;font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums}
+  .card .body{padding:12px}
+  .row{display:flex;justify-content:space-between;padding:4px 0;font-size:13px}
+  .row .k{color:var(--dim)}
+  .row .v{font-variant-numeric:tabular-nums}
+  .badge{font-size:10px;padding:2px 6px;border-radius:3px;font-weight:600;letter-spacing:.4px}
+  .b-long{background:rgba(14,203,129,.15);color:var(--green)}
+  .b-short{background:rgba(246,70,93,.15);color:var(--red)}
+  .b-flat{background:rgba(132,142,156,.15);color:var(--dim)}
+  .b-wait{background:rgba(240,185,11,.15);color:var(--amber)}
+  .pos{margin-top:8px;padding:8px;border-radius:6px;background:var(--bg);border:1px solid var(--line);font-size:12px;line-height:1.7}
+  .g{color:var(--green)} .r{color:var(--red)} .d{color:var(--dim)} .a{color:var(--amber)}
+  table{width:100%;border-collapse:collapse;margin-top:18px;font-size:12.5px}
+  th,td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{color:var(--dim);font-weight:500;text-transform:uppercase;font-size:10.5px;letter-spacing:.6px}
+  th:first-child,td:first-child{text-align:left}
+  tbody tr:hover{background:var(--panel)}
+  .foot{margin-top:10px;font-size:11px;color:var(--dim)}
+  .err{margin-top:14px;padding:10px 12px;border-radius:6px;border:1px solid var(--red);
+    background:rgba(246,70,93,.08);color:#ffb3bd;font-size:12px;display:none}
+  @media(max-width:600px){main{padding:12px}.kpi .val{font-size:19px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>AI Multi-Asset Bot</h1>
+  <span class="tag">Paper</span>
+  <span class="tag">BTC · ETH · SOL · XAUT</span>
+  <div class="spacer"></div>
+  <div class="meta">
+    <div>Last run: <span id="lastRun">—</span></div>
+    <div>Generated: <span id="gen">—</span></div>
+  </div>
+</header>
+
+<main>
+  <div class="kpis">
+    <div class="kpi"><div class="lbl">Total equity</div><div class="val" id="kTotal">—</div><div class="sub" id="kTotalSub">4 × $100 start</div></div>
+    <div class="kpi"><div class="lbl">Total P&amp;L</div><div class="val" id="kPnl">—</div><div class="sub" id="kPnlPct">—</div></div>
+    <div class="kpi"><div class="lbl">Trades closed</div><div class="val" id="kTrades">—</div><div class="sub" id="kOpen">—</div></div>
+    <div class="kpi"><div class="lbl">Win rate</div><div class="val" id="kWin">—</div><div class="sub" id="kPf">—</div></div>
+  </div>
+
+  <div class="cards" id="cards"></div>
+  <div class="err" id="err"></div>
+
+  <table>
+    <thead><tr>
+      <th>Time (UTC)</th><th>Symbol</th><th>Event</th><th>Side</th>
+      <th>Entry</th><th>Exit</th><th>Qty</th><th>Reason</th><th>P&amp;L</th><th>Equity</th>
+    </tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div class="foot">Source: bot_state.json + bot_trades.csv (GitHub raw). Bot runs hourly at :05 UTC. Paper mode only — no real orders.</div>
+</main>
+
+<script>
+const CFG = { repo: "alpeshukani/ai-bot", branch: "main" };
+const RAW = `https://raw.githubusercontent.com/${CFG.repo}/${CFG.branch}/`;
+const SYMS = ["BTCUSD","ETHUSD","SOLUSD","XAUTUSD"];
+const START = 100;
+
+const bust = () => Date.now() + "-" + Math.random().toString(36).slice(2);
+const fmt = (n,d=2) => (n===null||n===undefined||n==="") ? "—"
+  : Number(n).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
+const money = n => (n>=0?"+":"-") + "$" + fmt(Math.abs(n),2);
+const css = n => n>0?"g":(n<0?"r":"d");
+
+async function fetchJson(u){
+  const c = new AbortController(); const t = setTimeout(()=>c.abort(), 12000);
+  try{ const r = await fetch(u,{cache:"no-store",signal:c.signal}); return await r.json(); }
+  finally{ clearTimeout(t); }
+}
+async function fetchText(u){
+  const c = new AbortController(); const t = setTimeout(()=>c.abort(), 12000);
+  try{ const r = await fetch(u,{cache:"no-store",signal:c.signal}); return await r.text(); }
+  finally{ clearTimeout(t); }
+}
+
+function parseCsv(txt){
+  const lines = txt.trim().split(/\r?\n/);
+  if(lines.length < 2) return [];
+  const head = lines[0].split(",");
+  return lines.slice(1).map(l=>{
+    const v = l.split(",");
+    const o = {}; head.forEach((h,i)=>o[h.trim()] = (v[i]||"").trim());
+    return o;
+  });
+}
+
+function card(sym, s){
+  const p = s.pos, pd = s.pending;
+  const eq = Number(s.equity ?? START);
+  const pnl = eq - START;
+  const pct = (eq/START - 1)*100;
+  let badge = `<span class="badge b-flat">FLAT</span>`;
+  let body = "";
+  if(p){
+    badge = `<span class="badge ${p.side==="LONG"?"b-long":"b-short"}">${p.side} ${p.qty}</span>`;
+    body = `<div class="pos">
+      Entry <b>${fmt(p.entry_px, p.entry_px>1000?1:3)}</b><br>
+      SL <b class="r">${fmt(p.sl, p.sl>1000?1:3)}</b> · TP <b class="g">${fmt(p.tp, p.tp>1000?1:3)}</b><br>
+      <span class="d">level ${fmt(p.lvl, p.lvl>1000?1:3)} (${p.kind||"?"} × ${p.touches||1})</span>
+    </div>`;
+  } else if(pd){
+    const isMkt = pd.market || pd.px === null || pd.px === undefined;
+    badge = `<span class="badge b-wait">${isMkt?"ORDER":"LIMIT"}</span>`;
+    body = `<div class="pos">
+      <b>${pd.dir===1?"BUY":"SELL"}</b> ${isMkt?"market (next open)":`limit @ <b>${fmt(pd.px, pd.px>1000?1:3)}</b>`}<br>
+      SL <b class="r">${fmt(pd.sl, pd.sl>1000?1:3)}</b><br>
+      <span class="d">level ${fmt(pd.lvl_px, pd.lvl_px>1000?1:3)} (${pd.kind||"?"} × ${pd.touches||1}) · score ${pd.score||"—"}/11</span>
+    </div>`;
+  }
+  return `<div class="card">
+    <div class="head"><span class="sym">${sym}</span>${badge}
+      <span class="px">${s.last_price?fmt(s.last_price, s.last_price>1000?1:4):"—"}</span></div>
+    <div class="body">
+      <div class="row"><span class="k">Equity</span><span class="v">$${fmt(eq)}</span></div>
+      <div class="row"><span class="k">P&amp;L</span><span class="v ${css(pnl)}">${money(pnl)} (${pct>=0?"+":""}${fmt(pct,2)}%)</span></div>
+      <div class="row"><span class="k">Trades</span><span class="v">${s.trades ?? 0}</span></div>
+      ${body}
+    </div>
+  </div>`;
+}
+
+function renderCards(st){
+  const box = document.getElementById("cards");
+  box.innerHTML = SYMS.map(sym=>{
+    const s = (st.instruments||{})[sym] || {};
+    return card(sym, s);
+  }).join("");
+}
+
+function renderKpis(st, trades){
+  const inst = st.instruments || {};
+  const total = SYMS.reduce((a,s)=>a + Number((inst[s]||{}).equity ?? START), 0);
+  const start = START * SYMS.length;
+  const pnl = total - start;
+  const pct = (total/start - 1)*100;
+  const closed = trades.filter(t=>t.event==="EXIT");
+  const wins = closed.filter(t=>Number(t.pnl) > 0);
+  const wr = closed.length ? wins.length/closed.length*100 : 0;
+  const gp = wins.reduce((a,t)=>a+Number(t.pnl),0);
+  const gl = closed.filter(t=>Number(t.pnl)<=0).reduce((a,t)=>a+Math.abs(Number(t.pnl)),0);
+  const pf = gl>0 ? gp/gl : (gp>0?99:0);
+  const open = SYMS.filter(s=>(inst[s]||{}).pos).length;
+
+  document.getElementById("kTotal").textContent = "$" + fmt(total);
+  document.getElementById("kTotalSub").textContent = `start $${fmt(start,0)}`;
+  const kp = document.getElementById("kPnl");
+  kp.textContent = money(pnl); kp.className = "val " + css(pnl);
+  document.getElementById("kPnlPct").textContent = `${pct>=0?"+":""}${fmt(pct,2)}% · ${closed.length} closed`;
+  document.getElementById("kTrades").textContent = closed.length;
+  document.getElementById("kOpen").textContent = open ? `${open} open position(s)` : "flat";
+  document.getElementById("kWin").textContent = closed.length ? fmt(wr,1)+"%" : "—";
+  document.getElementById("kPf").textContent = `PF ${closed.length?fmt(pf,2):"—"}`;
+}
+
+function renderTrades(trades){
+  const tbody = document.getElementById("tbody");
+  const rows = trades.slice().reverse().slice(0,200);
+  if(!rows.length){ tbody.innerHTML = `<tr><td colspan="10" class="d">Abhi koi trade nahi.</td></tr>`; return; }
+  tbody.innerHTML = rows.map(t=>{
+    const pnl = t.pnl === "" ? null : Number(t.pnl);
+    return `<tr>
+      <td>${(t.time||"").replace(" UTC","")}</td>
+      <td>${t.instrument||""}</td>
+      <td>${t.event||""}</td>
+      <td>${t.side||""}</td>
+      <td>${t.entry_px?fmt(t.entry_px, Number(t.entry_px)>1000?1:4):"—"}</td>
+      <td>${t.exit_px?fmt(t.exit_px, Number(t.exit_px)>1000?1:4):"—"}</td>
+      <td>${t.qty??"—"}</td>
+      <td>${t.reason||""}</td>
+      <td class="${pnl===null?"d":css(pnl)}">${pnl===null?"—":money(pnl)}</td>
+      <td>${t.equity_after?fmt(t.equity_after):"—"}</td>
+    </tr>`;
+  }).join("");
+}
+
+(async function main(){
+  document.getElementById("gen").textContent = new Date().toISOString().slice(0,16).replace("T"," ") + " UTC";
+  try{
+    const st = await fetchJson(RAW + "bot_state.json?t=" + bust());
+    const csv = await fetchText(RAW + "bot_trades.csv?t=" + bust());
+    const trades = parseCsv(csv).filter(t=>t.event);
+    document.getElementById("lastRun").textContent = st.last_run || "—";
+    renderCards(st);
+    renderKpis(st, trades);
+    renderTrades(trades);
+  }catch(e){
+    const err = document.getElementById("err");
+    err.style.display = "block";
+    err.textContent = "Data load nahi hua (repo private ho sakta hai ya file missing hai). Detail: " + e.message;
+  }
+})();
+</script>
+</body>
+</html>
