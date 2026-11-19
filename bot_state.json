@@ -1,0 +1,61 @@
+{
+  "mode": "PAPER",
+  "instruments": {
+    "BTCUSD": {
+      "symbol": "BTCUSD",
+      "equity": 100.0,
+      "pos": null,
+      "pending": null,
+      "trades": 0,
+      "day_counts": {},
+      "held": [],
+      "day_key": null,
+      "day_start": null,
+      "last_bar": 0,
+      "last_price": null
+    },
+    "ETHUSD": {
+      "symbol": "ETHUSD",
+      "equity": 100.0,
+      "pos": null,
+      "pending": null,
+      "trades": 0,
+      "day_counts": {},
+      "held": [],
+      "day_key": null,
+      "day_start": null,
+      "last_bar": 0,
+      "last_price": null
+    },
+    "SOLUSD": {
+      "symbol": "SOLUSD",
+      "equity": 100.0,
+      "pos": null,
+      "pending": null,
+      "trades": 0,
+      "day_counts": {},
+      "held": [],
+      "day_key": null,
+      "day_start": null,
+      "last_bar": 0,
+      "last_price": null
+    },
+    "XAUTUSD": {
+      "symbol": "XAUTUSD",
+      "equity": 100.0,
+      "pos": null,
+      "pending": null,
+      "trades": 0,
+      "day_counts": {},
+      "held": [],
+      "day_key": null,
+      "day_start": null,
+      "last_bar": 0,
+      "last_price": null
+    }
+  },
+  "last_run": null,
+  "last_run_ts": 0,
+  "last_heartbeat": null,
+  "last_prices": {}
+}
