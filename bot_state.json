@@ -9,10 +9,10 @@
       "trades": 0,
       "day_counts": {},
       "held": [],
-      "day_key": null,
-      "day_start": null,
-      "last_bar": 0,
-      "last_price": null
+      "day_key": "20776",
+      "day_start": 100.0,
+      "last_bar": 1795078800,
+      "last_price": 63807.962526
     },
     "ETHUSD": {
       "symbol": "ETHUSD",
@@ -22,10 +22,10 @@
       "trades": 0,
       "day_counts": {},
       "held": [],
-      "day_key": null,
-      "day_start": null,
-      "last_bar": 0,
-      "last_price": null
+      "day_key": "20776",
+      "day_start": 100.0,
+      "last_bar": 1795078800,
+      "last_price": 1805.664146
     },
     "SOLUSD": {
       "symbol": "SOLUSD",
@@ -35,10 +35,10 @@
       "trades": 0,
       "day_counts": {},
       "held": [],
-      "day_key": null,
-      "day_start": null,
-      "last_bar": 0,
-      "last_price": null
+      "day_key": "20776",
+      "day_start": 100.0,
+      "last_bar": 1795078800,
+      "last_price": 74.561643
     },
     "XAUTUSD": {
       "symbol": "XAUTUSD",
@@ -48,14 +48,19 @@
       "trades": 0,
       "day_counts": {},
       "held": [],
-      "day_key": null,
-      "day_start": null,
-      "last_bar": 0,
-      "last_price": null
+      "day_key": "20776",
+      "day_start": 100.0,
+      "last_bar": 1795078800,
+      "last_price": 3726.165017
     }
   },
-  "last_run": null,
-  "last_run_ts": 0,
-  "last_heartbeat": null,
-  "last_prices": {}
+  "last_run": "2026-11-19 10:02 UTC",
+  "last_run_ts": 1795082520,
+  "last_heartbeat": "2026-11-19",
+  "last_prices": {
+    "BTCUSD": 63807.962526,
+    "ETHUSD": 1805.664146,
+    "SOLUSD": 74.561643,
+    "XAUTUSD": 3726.165017
+  }
 }
